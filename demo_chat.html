@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG知识库聊天界面 - 演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #374151;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .message-sources {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 8px;
+            font-size: 12px;
+            color: #4facfe;
+        }
+
+        .message-sources strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+            position: relative;
+        }
+
+        #messageInput {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+            resize: none;
+            max-height: 120px;
+            min-height: 50px;
+            font-family: inherit;
+        }
+
+        #messageInput:focus {
+            border-color: #4facfe;
+        }
+
+        #sendButton {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        #sendButton:hover {
+            transform: scale(1.05);
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #6b7280;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-message h2 {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+
+        .demo-notice {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="status-indicator"></div>
+            <h1>🤖 RAG知识库助手</h1>
+            <p>基于RAG架构的智能问答系统</p>
+        </div>
+
+        <div class="chat-messages">
+            <div class="demo-notice">
+                <strong>📋 演示界面</strong><br>
+                这是RAG知识库的Web聊天界面预览。在实际部署中，此界面将连接到后端API进行实时问答。
+            </div>
+            
+            <div class="welcome-message">
+                <h2>👋 欢迎使用RAG知识库！</h2>
+                <p>我可以帮您从已上传的文档中找到答案。请随时提问！</p>
+            </div>
+
+            <!-- 示例对话 -->
+            <div class="message user">
+                <div class="message-avatar">您</div>
+                <div class="message-content">
+                    什么是RAG架构？它是如何工作的？
+                </div>
+            </div>
+
+            <div class="message assistant">
+                <div class="message-avatar">AI</div>
+                <div class="message-content">
+                    RAG（Retrieval Augmented Generation）是一种结合检索和生成的AI架构。它的工作流程如下：
+
+                    1. **文档处理**：将文档分割成小块并转换为向量嵌入
+                    2. **向量存储**：使用向量数据库（如Chroma）存储文档嵌入
+                    3. **检索**：根据用户问题检索相关文档片段
+                    4. **生成**：将检索到的信息作为上下文提供给LLM生成回答
+
+                    这种架构能够提供更准确、有根据的回答，避免大模型的幻觉问题。
+                    
+                    <div class="message-sources">
+                        <strong>📚 参考文档:</strong>rag_introduction.txt, web_development.txt
+                    </div>
+                </div>
+            </div>
+
+            <div class="message user">
+                <div class="message-avatar">您</div>
+                <div class="message-content">
+                    这个系统支持哪些文档格式？
+                </div>
+            </div>
+
+            <div class="message assistant">
+                <div class="message-avatar">AI</div>
+                <div class="message-content">
+                    这个RAG知识库系统支持多种文档格式：
+
+                    • **PDF文件**：使用PyPDFium2Loader加载
+                    • **HTML文件**：使用BSHTMLLoader加载  
+                    • **TXT文件**：使用TextLoader加载
+                    • **JSON文件**：使用JSONLoader加载
+                    • **Markdown文件**：使用TextLoader加载
+
+                    系统会根据文件扩展名自动选择合适的加载器，并对不支持的文件类型进行跳过处理。
+                    
+                    <div class="message-sources">
+                        <strong>📚 参考文档:</strong>rag_introduction.txt
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <div class="input-group">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="请输入您的问题..." 
+                    rows="1"
+                ></textarea>
+            </div>
+            <button id="sendButton">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22,2 15,22 11,13 2,9"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Demo functionality - just for display
+        document.getElementById('sendButton').addEventListener('click', function() {
+            alert('这是演示界面。在实际部署中，此按钮会向后端API发送请求。');
+        });
+
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                alert('这是演示界面。在实际部署中，按回车键会发送消息。');
+            }
+        });
+    </script>
+</body>
+</html>
