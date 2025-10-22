@@ -1,0 +1,28 @@
+Python Web开发指南
+
+FastAPI是一个现代、快速的Web框架，用于构建API。
+
+主要特性：
+- 高性能：基于Starlette和Pydantic
+- 自动API文档：自动生成OpenAPI/Swagger文档
+- 类型检查：基于Python类型提示
+- 异步支持：原生支持async/await
+
+PyInstaller打包：
+PyInstaller是一个将Python应用打包为独立可执行文件的工具。
+
+打包命令：
+pyinstaller --onefile your_script.py
+
+打包配置：
+- 可以通过.spec文件进行详细配置
+- 支持包含数据文件和静态资源
+- 可以设置图标和其他元数据
+
+部署方式：
+1. 源码部署：需要Python环境
+2. 容器部署：使用Docker
+3. 可执行文件：通过PyInstaller打包
+
+Uvicorn是ASGI服务器，用于运行FastAPI应用：
+uvicorn app:app --host 0.0.0.0 --port 8000

@@ -10,7 +10,7 @@ import shutil
 from typing import List, Tuple, Optional
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader, PyPDFium2Loader
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, UnstructuredHTMLLoader, BSHTMLLoader, JSONLoader
 from langchain_core.documents import Document
@@ -207,10 +207,10 @@ class KnowledgeBaseService:
             {"role": "system", 
              "content": (
                     "你是一个知识渊博、乐于助人的AI助手。\n"
-                    "请结合你自己的知识和下面提供的"上下文信息"来回答用户的问题。\n"
+                    "请结合你自己的知识和下面提供的'上下文信息'来回答用户的问题。\n"
                     "规则：\n"
-                    "1. 优先使用"上下文信息"来寻找答案。你的回答应该主要基于上下文。\n"
-                    "2. 仅当"上下文信息"为空或与问题完全无关时，你才可以使用你的通用知识来回答。\n"
+                    "1. 优先使用'上下文信息'来寻找答案。你的回答应该主要基于上下文。\n"
+                    "2. 仅当'上下文信息'为空或与问题完全无关时，你才可以使用你的通用知识来回答。\n"
                     "3. 如果你使用了上下文信息，请在回答时保持简洁和相关性。\n"
                     "4. 如果上下文信息为空，而你使用通用知识回答，请自然地回答，不要提及上下文。\n"
                 )
